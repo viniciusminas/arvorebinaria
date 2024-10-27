@@ -23,8 +23,36 @@ begin
 	//mun :=nil;	
 end;  
 
-procedure VerificarEstadoExiste();
+Procedure PreOrdem(Raiz: nodo_estados);
+begin
+    if Raiz <> nil then 
+    begin
+        write(Raiz^.uf, '-');
+        PreOrdem(Raiz^.estesq);
+        PreOrdem(Raiz^.estdir);
+    end;
+end;
+
+function VerificarEstadoExiste(arvraiz: nodo_estados; estuf: string): string;
+var achou: integer;
+		ref: string;
+		auxant, aux: nodo_estados;
 begin 
+    ref := arvraiz^.uf;
+  	auxant := arvraiz;
+  	aux := arvraiz^.estesq;		
+  	achou := 0;
+  	
+  	while achou = 0 do
+  	begin
+  		if ref = estuf then
+  		begin
+  			VerificarEstadoExiste := 'Existe!';
+  			achou := 1;
+  		end
+  		else
+  			achou := 1;
+  	end
 end; 
 
 procedure CriarEstado(var arvraiz: nodo_estados; estuf: string);
@@ -41,10 +69,9 @@ begin
 		arvraiz^.municipio := nil;
 		arvraiz^.uf := estuf;
 	end
-	
 	else 
-	begin
-		
+	begin 
+		writeln(VerificarEstadoExiste(arvraiz, estuf));	
 	end;
 		
 end;
@@ -75,6 +102,7 @@ end;  }
     
 Begin
 	IniciarVariaveis(estados);
+  CriarEstado(estados, 'SC');
   CriarEstado(estados, 'SC');
   write(estados^.uf);
 End.
