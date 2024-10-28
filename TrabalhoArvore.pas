@@ -50,8 +50,33 @@ begin
   			VerificarEstadoExiste := 'Existe!';
   			achou := 1;
   		end
-  		else
-  			achou := 1;
+  		//Verifica Esquerda
+  		else if estuf < ref then
+  		begin
+      	if aux = nil then
+      	begin
+      		writeln('Não existe. Posição à esquerda de: ', auxant^.uf);
+      		achou := 1;
+      	end
+      	else
+      	begin
+      		auxant := aux;
+					aux := aux^.estesq;
+      	end
+      end
+      else
+			begin
+				if aux = nil then
+      	begin
+      		writeln('Não existe. Posição à direita de: ', auxant^.uf);
+      		achou := 1;
+      	end
+      	else
+      	begin
+      		auxant := aux;
+					aux := aux^.estdir;
+      	end
+			end	
   	end
 end; 
 
@@ -103,6 +128,7 @@ end;  }
 Begin
 	IniciarVariaveis(estados);
   CriarEstado(estados, 'SC');
-  CriarEstado(estados, 'SC');
+  CriarEstado(estados, 'AA');
+  CriarEstado(estados, 'ZZ');
   write(estados^.uf);
 End.
