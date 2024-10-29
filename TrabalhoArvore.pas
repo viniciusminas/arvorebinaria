@@ -1,12 +1,12 @@
-Program Trabalho_arv ;
-type
+Program Trabalho_arv;                                                    
+type                                                          
 		nodo_municipios = ^nodo_mun;
     nodo_mun = Record
         sigla_uf: string;
         desc_municipio: string;
-        munesq, munesq, munpai: nodo_municipios;
+        mundir, munesq, munpai: nodo_municipios;
     end;
-        
+    
     nodo_estados = ^nodo_est;
     nodo_est = Record
         uf: string;
@@ -131,30 +131,63 @@ begin
 	end;
 		
 end;
-		{
-function CriarMunicipio();
+
+procedure CriarMunicipio(var arvmun: nodo_municipios; municipio: string);
+var novoMun: nodo_municipios;
 begin
+    new(novoMun);
+    novoMun^.desc_municipio := municipio;
+    novoMun^.munesq := nil;
+    novoMun^.mundir := nil;           
+    novoMun^.munpai := nil;
+
+    if arvmun = nil then
+        arvmun := novoMun
+    else
+    begin
+        if municipio < arvmun^.desc_municipio then
+            CriarMunicipio(arvmun^.munesq, municipio)
+        else
+            CriarMunicipio(arvmun^.mundir, municipio);
+    end;
 end;
 
-function PosicionarMunicipio();
+{function PosicionarMunicipio();
 begin
 end;
 
 function VerificarUltimoMunicipio();
 begin
-end;
+end;}
 
-procedure IncluirMunicipio();
+procedure IncluirMunicipio(var arvraiz: nodo_estados; uf, municipio: string);
+var est: nodo_estados;
 begin
+    est := arvraiz;
+
+    if VerificarEstadoExiste(arvraiz, uf)^.uf <> uf then
+        CriarEstado(arvraiz, uf);
+
+    while (est <> nil) and (est^.uf <> uf) do
+    begin
+        if uf < est^.uf then
+            est := est^.estesq
+        else
+            est := est^.estdir;
+    end;
+	
+	//condicional para adicionar o municipio na árvore desse estado
+	if est <> nil then
+		CriarMunicipio(est^.municipio, municipio);
 end;
 
-procedure ExcluirMunicipio();
+{procedure ExcluirMunicipio();
 begin
 end;
 
 procedure cadastrarMunicipio();
 begin
-end;  }
+end;} 
     
 Begin
 	IniciarVariaveis(estados);
