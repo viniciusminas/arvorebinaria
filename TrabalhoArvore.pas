@@ -16,6 +16,16 @@ type
   
 var
 	estados: nodo_estados;
+	
+Procedure EmOrdem(Raiz: nodo_estados);
+begin
+    if Raiz <> nil then 
+    begin
+        EmOrdem(Raiz^.estesq);
+        write(Raiz^.uf, '-');
+        EmOrdem(Raiz^.estdir);
+    end;
+end;
 
 procedure IniciarVariaveis(var est: nodo_estados{; var mun: nodo_municipio});
 begin
@@ -33,7 +43,7 @@ begin
     end;
 end;
 
-function VerificarEstadoExiste(arvraiz: nodo_estados; estuf: string): string;
+function VerificarEstadoExiste(arvraiz: nodo_estados; estuf: string): nodo_estados;
 var achou: integer;
 		ref: string;
 		auxant, aux: nodo_estados;
@@ -45,16 +55,18 @@ begin
   	
   	while achou = 0 do
   	begin
-  		if ref = estuf then
+  		if auxant^.uf = estuf then
   		begin
-  			VerificarEstadoExiste := 'Existe!';
+  			VerificarEstadoExiste := auxant;
+  			//writeln('Existe');
   			achou := 1;
   		end
   		//Verifica Esquerda
-  		else if estuf < ref then
+  		else if estuf < auxant^.uf then
   		begin
       	if aux = nil then
       	begin
+      		VerificarEstadoExiste := auxant;
       		writeln('Não existe. Posição à esquerda de: ', auxant^.uf);
       		achou := 1;
       	end
@@ -66,8 +78,10 @@ begin
       end
       else
 			begin
+				aux := auxant^.estdir;
 				if aux = nil then
       	begin
+      		VerificarEstadoExiste := auxant;
       		writeln('Não existe. Posição à direita de: ', auxant^.uf);
       		achou := 1;
       	end
@@ -81,7 +95,7 @@ begin
 end; 
 
 procedure CriarEstado(var arvraiz: nodo_estados; estuf: string);
-var estraiz: nodo_estados;
+var estraiz, estado, NovoEstado: nodo_estados;
 begin
 	new(estraiz);
 	
@@ -96,7 +110,24 @@ begin
 	end
 	else 
 	begin 
-		writeln(VerificarEstadoExiste(arvraiz, estuf));	
+		estado := VerificarEstadoExiste(arvraiz, estuf);	
+		if (estado^.uf = estuf) then
+			writeln('O estado já existe: ', estado^.uf)
+		else
+		begin
+			new(NovoEstado);
+			NovoEstado^.uf := estuf;
+			NovoEstado^.estpai := estado;
+			NovoEstado^.estesq := nil;
+			NovoEstado^.estdir := nil;
+			if estado^.uf > NovoEstado^.uf then
+				estado^.estesq := NovoEstado
+			else
+				estado^.estdir := NovoEstado;
+				
+			writeln('Novo Estado: ', NovoEstado^.uf);
+		end;
+				
 	end;
 		
 end;
@@ -128,7 +159,9 @@ end;  }
 Begin
 	IniciarVariaveis(estados);
   CriarEstado(estados, 'SC');
-  CriarEstado(estados, 'AA');
+  CriarEstado(estados, 'SC');
+  CriarEstado(estados, 'BB');
   CriarEstado(estados, 'ZZ');
-  write(estados^.uf);
+  writeln;
+  EmOrdem(estados);
 End.
