@@ -61,7 +61,7 @@ begin
   			//writeln('Existe');
   			achou := 1;
   		end
-  		//Verifica Esquerda
+
   		else if estuf < auxant^.uf then
   		begin
       	if aux = nil then
@@ -164,7 +164,7 @@ procedure IncluirMunicipio(var arvraiz: nodo_estados; uf, municipio: string);
 var est: nodo_estados;
 begin
     est := arvraiz;
-
+			
     if VerificarEstadoExiste(arvraiz, uf)^.uf <> uf then
         CriarEstado(arvraiz, uf);
 
@@ -187,14 +187,67 @@ end;
 
 procedure cadastrarMunicipio();
 begin
-end;} 
+end;}
+
+procedure ProcessarOpcao();
+var
+	op: integer;
+	uf, municipio: string;
+begin
+	repeat
+		writeln('0 - FECHAR PROGRAMA ');
+		writeln('1 - INSERE ESTADO');
+		writeln('2 - INSERE MUNICIPIO');
+		writeln('3 - EXIBIR ARVORE EM ORDEM');
+		writeln('4 - EXIBIR ARVORE EM PRE-ORDEM');
+		write('Escolha uma opção: ');
+		readln(op);
+	
+		case op of
+			1: begin
+					writeln('Digite a sigla do estado a ser adicionado: ');
+					readln(uf);
+					CriarEstado(estados, uf);
+			   end;
+			 
+			2: begin
+					writeln('Digite a sigla do estado: ');
+					readln(uf);
+					writeln('Digite o nome do município: ');
+					readln(municipio);
+					IncluirMunicipio(estados, uf, municipio);
+			   end;
+			 
+			3: begin
+					writeln('Exibindo árvore em ordem:');
+					EmOrdem(estados);
+					writeln;
+			   end;
+			 
+			4: begin
+					writeln('Exibindo árvore em pré-ordem:');
+					PreOrdem(estados);
+					writeln;
+			   end;
+			
+			0: writeln('Saindo do programa...');
+			
+			else
+				writeln('Opção inválida. Tente novamente.');
+		end;
+	until op = 0;
+end;
+
     
 Begin
-	IniciarVariaveis(estados);
+
+  IniciarVariaveis(estados);
+	ProcessarOpcao;
+	{IniciarVariaveis(estados);
   CriarEstado(estados, 'SC');
   CriarEstado(estados, 'SC');
   CriarEstado(estados, 'BB');
   CriarEstado(estados, 'ZZ');
   writeln;
-  EmOrdem(estados);
+  EmOrdem(estados); }
 End.
