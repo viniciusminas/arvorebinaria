@@ -33,11 +33,22 @@ begin
 	//mun :=nil;	
 end;  
 
+Procedure ExibirMunicipios(RaizMunicipio: nodo_municipios);
+begin
+	if RaizMunicipio <> nil then
+	begin
+		write(RaizMunicipio^.desc_municipio, ', ');
+		ExibirMunicipios(RaizMunicipio^.munesq);
+		ExibirMunicipios(RaizMunicipio^.mundir);
+	end;
+end;
+
 Procedure PreOrdem(Raiz: nodo_estados);
 begin
     if Raiz <> nil then 
     begin
         write(Raiz^.uf, '-');
+        ExibirMunicipios(Raiz^.municipio); //teste para mostrar os mun's.
         PreOrdem(Raiz^.estesq);
         PreOrdem(Raiz^.estdir);
     end;
@@ -94,6 +105,7 @@ begin
   	end
 end;
 
+
 function VerificarMunicipioExiste(arvmun: nodo_municipios; municipio: string):boolean;
 begin
 	if arvmun = nil then
@@ -104,7 +116,7 @@ begin
 	  VerificarMunicipioExiste := VerificarMunicipioExiste(arvmun^.munesq, municipio)
 	else
       VerificarMunicipioExiste := VerificarMunicipioExiste(arvmun^.mundir, municipio);
-end;
+end; 
 
 procedure CriarEstado(var arvraiz: nodo_estados; estuf: string);
 var estraiz, estado, NovoEstado: nodo_estados;
@@ -173,7 +185,8 @@ begin
 end;}
 
 procedure IncluirMunicipio(var arvraiz: nodo_estados; uf, municipio: string);
-var est: nodo_estados;
+var 
+		est: nodo_estados;
 begin
     est := arvraiz;
 			
@@ -189,8 +202,10 @@ begin
     end;
 	
 	//condicional para adicionar o municipio na árvore desse estado
-	if est <> nil then
-		CriarMunicipio(est^.municipio, municipio);
+	if (est <> nil) and (not VerificarMunicipioExiste(est^.municipio, municipio)) then
+		CriarMunicipio(est^.municipio, municipio)
+	else
+		writeln('Municipio já existe: ', municipio); //depuration, teste rs
 end;
 
 {procedure ExcluirMunicipio();
@@ -223,9 +238,9 @@ begin
 			   end;
 			 
 			2: begin
-					writeln('Digite a sigla do estado: ');
+					writeln('Digite a sigla do estado: ');                   
 					readln(uf);
-					writeln('Digite o nome do município: ');
+					writeln('Digite o nome do município: ' );
 					readln(municipio);
 					IncluirMunicipio(estados, uf, municipio);
 			   end;
