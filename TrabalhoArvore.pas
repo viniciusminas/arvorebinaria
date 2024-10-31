@@ -92,7 +92,19 @@ begin
       	end
 			end	
   	end
-end; 
+end;
+
+function VerificarMunicipioExiste(arvmun: nodo_municipios; municipio: string):boolean;
+begin
+	if arvmun = nil then
+		VerificarMunicipioExiste := false
+	else if arvmun^.desc_municipio = municipio then //se o nome inserido ja existe no nó
+		VerificarMunicipioExiste := true
+	else if municipio < arvmun^.desc_municipio then
+	  VerificarMunicipioExiste := VerificarMunicipioExiste(arvmun^.munesq, municipio)
+	else
+      VerificarMunicipioExiste := VerificarMunicipioExiste(arvmun^.mundir, municipio);
+end;
 
 procedure CriarEstado(var arvraiz: nodo_estados; estuf: string);
 var estraiz, estado, NovoEstado: nodo_estados;
