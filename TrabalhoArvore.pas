@@ -152,6 +152,32 @@ begin
 				
 end;
 
+function ExcluirRaizArvore(var arvraiz:nodo_estados): nodo_estados;
+var aux, NovaRaiz : nodo_estados;
+begin
+	if arvraiz^.estdir <> nil then
+	begin
+		NovaRaiz := arvraiz^.estdir;
+		NovaRaiz^.estpai := nil;
+		if arvraiz^.estesq <> nil then
+		begin
+			writeln(NovaRaiz^.uf);
+			aux := AcharPosicao(NovaRaiz, arvraiz^.estesq^.uf);
+			writeln(aux^.uf);
+			aux^.estesq := arvraiz^.estesq;
+			arvraiz^.estesq^.estpai := aux;
+		end;
+		
+	end
+	else if arvraiz^.estesq <> nil then
+	begin
+		NovaRaiz := arvraiz^.estesq
+	end;
+	dispose(arvraiz);
+	ExcluirRaizArvore := NovaRaiz;	
+		
+end;
+
 procedure ExcluirEstado(var arvraiz: nodo_estados;estuf: string);
 var estado, aux: nodo_estados;
 begin
