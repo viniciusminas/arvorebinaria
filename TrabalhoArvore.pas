@@ -27,6 +27,16 @@ begin
     end;
 end;
 
+Procedure EmOrdemMun(Raiz: nodo_municipios);
+begin
+    if Raiz <> nil then 
+    begin
+        EmOrdemMun(Raiz^.munesq);
+        write(Raiz^.desc_municipio, '-');
+        EmOrdemMun(Raiz^.mundir);
+    end;
+end;
+
 procedure IniciarVariaveis(var est: nodo_estados{; var mun: nodo_municipio});
 begin
 	est := nil;
@@ -149,7 +159,7 @@ begin
 		
 end;
 
-procedure CriarMunicipio(var arvmun: nodo_municipios; municipio: string);
+procedure CriarMunicipio(var arvmun, arvpai: nodo_municipios; municipio: string);
 var novoMun: nodo_municipios;
 begin
     new(novoMun);
@@ -159,13 +169,16 @@ begin
     novoMun^.munpai := nil;
 
     if arvmun = nil then
-        arvmun := novoMun
+    begin
+        arvmun := novoMun;
+        arvmun^.munpai := arvpai;
+    end
     else
     begin
         if municipio < arvmun^.desc_municipio then
-            CriarMunicipio(arvmun^.munesq, municipio)
+            CriarMunicipio(arvmun^.munesq, arvmun, municipio)
         else
-            CriarMunicipio(arvmun^.mundir, municipio);
+            CriarMunicipio(arvmun^.mundir, arvmun, municipio);
     end;
 end;
 
@@ -185,6 +198,25 @@ begin
 			AcharPosicao := arvraiz
 		else
 			AcharPosicao := AcharPosicao(arvraiz^.estesq, estuf);	
+	end
+				
+end;
+
+function AcharPosicaoMun(var arvraiz: nodo_municipios; descmun: string): nodo_municipios;
+begin
+	if (arvraiz^.desc_municipio < descmun) then
+	begin 	
+		if (arvraiz^.mundir = nil) then
+			AcharPosicaoMun := arvraiz
+		else
+			AcharPosicaoMun := AcharPosicaoMun(arvraiz^.mundir, descmun);	
+	end
+	else
+	begin
+		if (arvraiz^.munesq = nil) then
+			AcharPosicaoMun := arvraiz
+		else
+			AcharPosicaoMun := AcharPosicaoMun(arvraiz^.munesq, descmun);	
 	end
 				
 end;
@@ -214,9 +246,9 @@ begin
 	ExcluirRaizArvore := NovaRaiz;	
 		
 end;
-{
+
 function ExcluirRaizMun(var arvraiz:nodo_municipios): nodo_municipios;
-var aux, NovaRaiz : nodo_estados;
+var aux, NovaRaiz : nodo_municipios;
 begin
 	if arvraiz^.mundir <> nil then
 	begin
@@ -225,21 +257,21 @@ begin
 		if arvraiz^.munesq <> nil then
 		begin
 			writeln(NovaRaiz^.desc_municipio);
-			aux := AcharPosicao(NovaRaiz, arvraiz^.munesq^.desc_municipio);
+			aux := AcharPosicaoMun(NovaRaiz, arvraiz^.munesq^.desc_municipio);
 			writeln(aux^.desc_municipio);
 			aux^.munesq := arvraiz^.munesq;
 			arvraiz^.munesq^.munpai := aux;
 		end;
 		
 	end
-	else if arvraiz^.estesq <> nil then
+	else if arvraiz^.munesq <> nil then
 	begin
-		NovaRaiz := arvraiz^.estesq
+		NovaRaiz := arvraiz^.munesq
 	end;
 	dispose(arvraiz);
-	ExcluirRaizArvore := NovaRaiz;	
+	ExcluirRaizMun := NovaRaiz;	
 		
-end; }
+end; 
 
 procedure ExcluirEstado(var arvraiz: nodo_estados;estuf: string);
 var estado, aux: nodo_estados;
@@ -294,10 +326,67 @@ begin
 end;
 
 procedure ExcluirMunicipio(var estraiz:nodo_estados; descmun, estuf: string);
-var municipio, estado, aux: nodo_municipios;
+var municipio, aux: nodo_municipios; 
+    estado: nodo_estados;
 begin
 	estado := VerificarEstadoExiste(estraiz, estuf);
-	municipio := VerificarMunicipioExiste(estado, descmun); 
+	writeln('estmun: ', estado^.municipio^.desc_municipio);
+	municipio := VerificarMunicipioExiste(estado^.municipio, descmun);
+	writeln;
+	writeln;
+	writeln(estado^.uf);
+	writeln(municipio^.desc_municipio);
+	writeln('aqui: ', estuf, ' ', descmun);
+	writeln;
+	if municipio^.desc_municipio = descmun then
+	begin
+		writeln('Municipio: ', municipio^.desc_municipio);
+		writeln;
+		if municipio^.desc_municipio = estraiz^.municipio^.desc_municipio then
+				estado^.municipio :=  ExcluirRaizMun(municipio)
+		else
+		begin
+			if (municipio^.munesq = nil) and (municipio^.mundir = nil) then
+				begin
+					if municipio = municipio^.munpai^.munesq then
+						municipio^.munpai^.munesq := nil	
+					else
+					  municipio^.munpai^.mundir := nil;
+					dispose(municipio);
+				end
+			else
+			begin
+					if municipio^.munpai^.desc_municipio < municipio^.desc_municipio then
+					begin
+						if municipio^.munesq <> nil then
+							municipio^.munpai^.mundir := municipio^.munesq
+						else
+							municipio^.munpai^.mundir := municipio^.mundir;
+						aux := AcharPosicaoMun(municipio^.munesq, municipio^.mundir^.desc_municipio);
+						aux^.mundir := municipio^.mundir;
+						municipio^.mundir^.munpai := aux;
+						dispose(estado);
+					
+					end
+					else
+					begin
+						if municipio^.mundir <> nil then 
+							municipio^.munpai^.munesq := municipio^.mundir
+						else 
+							municipio^.munpai^.munesq := municipio^.munesq;    
+						aux := AcharPosicaoMun(municipio^.mundir, municipio^.munesq^.desc_municipio);
+						aux^.munesq := municipio^.munesq;
+						municipio^.munesq^.munpai := aux;
+						dispose(municipio);
+					end
+			end
+		end		
+	end
+	else
+		writeln('Município não existe!');
+	 
+	
+	
 end;
 
 {function PosicionarMunicipio();
@@ -326,8 +415,8 @@ begin
     end;
 	
 	//condicional para adicionar o municipio na árvore desse estado
-	if (est <> nil) and (VerificarMunicipioExiste(est^.municipio, municipio)<> nil) then
-		CriarMunicipio(est^.municipio, municipio)
+	if (est <> nil) and (VerificarMunicipioExiste(est^.municipio, municipio) = nil) then
+		CriarMunicipio(est^.municipio, est^.municipio, municipio)
 	else
 		writeln('Municipio já existe: ', municipio); //depuration, teste rs
 end;
@@ -362,10 +451,13 @@ begin
 					writeln('Digite o nome do município: ' );
 					readln(municipio);
 					IncluirMunicipio(estados, uf, municipio);
-					clrscr;
+			    writeln;
+					writeln(estados^.uf);
+					writeln(estados^.municipio^.desc_municipio);
 			   end;
 			 
 			2: begin
+					clrscr;
 					writeln('Exibindo árvore em ordem:');
 					clrscr;
 					EmOrdem(estados);
@@ -373,18 +465,20 @@ begin
 			   end;
 			 
 			3: begin
+				  clrscr;
 					writeln('Exibindo árvore em ordem:');
-					clrscr;
-					EmOrdem(estados);
+					EmOrdemMun(estados^.municipio);
+					writeln;
+					writeln('Pai: ', estados^.municipio^.munesq^.munpai^.desc_municipio);
 					writeln;
 			   end;
 			
 			4: begin
-				 writeln('Digite o município a ser excluido: ');
-				 readln(municipio);
-				 writeln('Digite o estado do município a ser excluido: ');
-				 readln(uf);
-				 ExcluirMunicipio(estados, municipio, uf);
+					 writeln('Digite o município a ser excluido: ');
+					 readln(municipio);
+					 writeln('Digite o estado do município a ser excluido: ');
+					 readln(uf);
+					 ExcluirMunicipio(estados, municipio, uf);
 				 end;
 			
 			0: writeln('Saindo do programa...');
@@ -399,5 +493,116 @@ end;
 Begin
 
   IniciarVariaveis(estados);
+	IncluirMunicipio(estados, 'SP', 'São Paulo');
+	IncluirMunicipio(estados, 'SP', 'São Paulo');
+	IncluirMunicipio(estados, 'SP', 'Campinas');
+	IncluirMunicipio(estados, 'SP', 'Santos');
+	IncluirMunicipio(estados, 'SP', 'Sorocaba');
+	IncluirMunicipio(estados, 'SP', 'Ribeirão Preto');
+	IncluirMunicipio(estados, 'SP', 'São Bernardo do Campo');
+	IncluirMunicipio(estados, 'SP', 'São José dos Campos');
+	IncluirMunicipio(estados, 'SP', 'Osasco');
+	IncluirMunicipio(estados, 'SP', 'Mauá');
+	IncluirMunicipio(estados, 'SP', 'Bauru');
+	
+	IncluirMunicipio(estados, 'RJ', 'Rio de Janeiro');
+	IncluirMunicipio(estados, 'RJ', 'Niterói');
+	IncluirMunicipio(estados, 'RJ', 'Nova Iguaçu');
+	IncluirMunicipio(estados, 'RJ', 'Duque de Caxias');
+	IncluirMunicipio(estados, 'RJ', 'Volta Redonda');
+	IncluirMunicipio(estados, 'RJ', 'Macaé');
+	IncluirMunicipio(estados, 'RJ', 'Cabo Frio');
+	IncluirMunicipio(estados, 'RJ', 'Campos dos Goytacazes');
+	IncluirMunicipio(estados, 'RJ', 'Teresópolis');
+	IncluirMunicipio(estados, 'RJ', 'Petrópolis');
+	
+	IncluirMunicipio(estados, 'MG', 'Belo Horizonte');
+	IncluirMunicipio(estados, 'MG', 'Uberlândia');
+	IncluirMunicipio(estados, 'MG', 'Contagem');
+	IncluirMunicipio(estados, 'MG', 'Juiz de Fora');
+	IncluirMunicipio(estados, 'MG', 'Betim');
+	IncluirMunicipio(estados, 'MG', 'Ipatinga');
+	IncluirMunicipio(estados, 'MG', 'Montes Claros');
+	IncluirMunicipio(estados, 'MG', 'Governador Valadares');
+	IncluirMunicipio(estados, 'MG', 'Sete Lagoas');
+	IncluirMunicipio(estados, 'MG', 'Divinópolis');
+	
+	IncluirMunicipio(estados, 'RS', 'Porto Alegre');
+	IncluirMunicipio(estados, 'RS', 'Caxias do Sul');
+	IncluirMunicipio(estados, 'RS', 'Pelotas');
+	IncluirMunicipio(estados, 'RS', 'Santa Maria');
+	IncluirMunicipio(estados, 'RS', 'Gravataí');
+	IncluirMunicipio(estados, 'RS', 'Rio Grande');
+	IncluirMunicipio(estados, 'RS', 'Novo Hamburgo');
+	IncluirMunicipio(estados, 'RS', 'Santa Cruz do Sul');
+	IncluirMunicipio(estados, 'RS', 'São Leopoldo');
+	IncluirMunicipio(estados, 'RS', 'Bagé');
+	
+	IncluirMunicipio(estados, 'BA', 'Salvador');
+	IncluirMunicipio(estados, 'BA', 'Feira de Santana');
+	IncluirMunicipio(estados, 'BA', 'Vitória da Conquista');
+	IncluirMunicipio(estados, 'BA', 'Camaçari');
+	IncluirMunicipio(estados, 'BA', 'Itabuna');
+	IncluirMunicipio(estados, 'BA', 'Juazeiro');
+	IncluirMunicipio(estados, 'BA', 'Lauro de Freitas');
+	IncluirMunicipio(estados, 'BA', 'Ilhéus');
+	IncluirMunicipio(estados, 'BA', 'Porto Seguro');
+	IncluirMunicipio(estados, 'BA', 'Teixeira de Freitas');
+	
+	IncluirMunicipio(estados, 'PR', 'Curitiba');
+	IncluirMunicipio(estados, 'PR', 'Londrina');
+	IncluirMunicipio(estados, 'PR', 'Maringá');
+	IncluirMunicipio(estados, 'PR', 'Ponta Grossa');
+	IncluirMunicipio(estados, 'PR', 'Cascavel');
+	IncluirMunicipio(estados, 'PR', 'São José dos Pinhais');
+	IncluirMunicipio(estados, 'PR', 'Foz do Iguaçu');
+	IncluirMunicipio(estados, 'PR', 'Araucária');
+	IncluirMunicipio(estados, 'PR', 'Toledo');
+	IncluirMunicipio(estados, 'PR', 'Colombo');
+	
+	IncluirMunicipio(estados, 'PE', 'Recife');
+	IncluirMunicipio(estados, 'PE', 'Olinda');
+	IncluirMunicipio(estados, 'PE', 'Jaboatão dos Guararapes');
+	IncluirMunicipio(estados, 'PE', 'Caruaru');
+	IncluirMunicipio(estados, 'PE', 'Petrolina');
+	IncluirMunicipio(estados, 'PE', 'Garanhuns');
+	IncluirMunicipio(estados, 'PE', 'Igarassu');
+	IncluirMunicipio(estados, 'PE', 'São Lourenço da Mata');
+	IncluirMunicipio(estados, 'PE', 'Aglomeração Urbana do Recife');
+	IncluirMunicipio(estados, 'PE', 'Timbaúba');
+	
+	IncluirMunicipio(estados, 'CE', 'Fortaleza');
+	IncluirMunicipio(estados, 'CE', 'Caucaia');
+	IncluirMunicipio(estados, 'CE', 'Juazeiro do Norte');
+	IncluirMunicipio(estados, 'CE', 'Sobral');
+	IncluirMunicipio(estados, 'CE', 'Maracanaú');
+	IncluirMunicipio(estados, 'CE', 'Crato');
+	IncluirMunicipio(estados, 'CE', 'Iguatu');
+	IncluirMunicipio(estados, 'CE', 'Quixadá');
+	IncluirMunicipio(estados, 'CE', 'Aquiraz');
+	IncluirMunicipio(estados, 'CE', 'Pacajus');
+	
+	IncluirMunicipio(estados, 'GO', 'Goiânia');
+	IncluirMunicipio(estados, 'GO', 'Aparecida de Goiânia');
+	IncluirMunicipio(estados, 'GO', 'Anápolis');
+	IncluirMunicipio(estados, 'GO', 'Rio Verde');
+	IncluirMunicipio(estados, 'GO', 'Goiatuba');
+	IncluirMunicipio(estados, 'GO', 'Jataí');
+	IncluirMunicipio(estados, 'GO', 'Catalão');
+	IncluirMunicipio(estados, 'GO', 'Senador Canedo');
+	IncluirMunicipio(estados, 'GO', 'Formosa');
+	IncluirMunicipio(estados, 'GO', 'Luziânia');
+	
+	IncluirMunicipio(estados, 'SC', 'Florianópolis');
+	IncluirMunicipio(estados, 'SC', 'Joinville');
+	IncluirMunicipio(estados, 'SC', 'Blumenau');
+	IncluirMunicipio(estados, 'SC', 'Chapecó');
+	IncluirMunicipio(estados, 'SC', 'Criciúma');
+	IncluirMunicipio(estados, 'SC', 'São José');
+	IncluirMunicipio(estados, 'SC', 'Lages');
+	IncluirMunicipio(estados, 'SC', 'Itajaí');
+	IncluirMunicipio(estados, 'SC', 'Balneário Camboriú');
+	IncluirMunicipio(estados, 'SC', 'Jaraguá do Sul');
+	writeln(estados^.estesq^.municipio^.desc_municipio);
 	ProcessarOpcao;
 End.
