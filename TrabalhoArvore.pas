@@ -63,22 +63,18 @@ begin
   	auxant := arvraiz;
   	aux := arvraiz^.estesq;		
   	achou := 0;
-  	
   	while achou = 0 do
   	begin
   		if auxant^.uf = estuf then
   		begin
   			VerificarEstadoExiste := auxant;
-  			//writeln('Existe');
   			achou := 1;
   		end
-
   		else if estuf < auxant^.uf then
   		begin
       	if aux = nil then
       	begin
       		VerificarEstadoExiste := auxant;
-      		writeln('Não existe. Posição à esquerda de: ', auxant^.uf);
       		achou := 1;
       	end
       	else
@@ -93,7 +89,6 @@ begin
 				if aux = nil then
       	begin
       		VerificarEstadoExiste := auxant;
-      		writeln('Não existe. Posição à direita de: ', auxant^.uf);
       		achou := 1;
       	end
       	else
@@ -106,12 +101,12 @@ begin
 end;
 
 
-function VerificarMunicipioExiste(arvmun: nodo_municipios; municipio: string):boolean;
+function VerificarMunicipioExiste(arvmun: nodo_municipios; municipio: string):nodo_municipios;
 begin
 	if arvmun = nil then
-		VerificarMunicipioExiste := false
+		VerificarMunicipioExiste := nil
 	else if arvmun^.desc_municipio = municipio then //se o nome inserido ja existe no nó
-		VerificarMunicipioExiste := true
+		VerificarMunicipioExiste := arvmun
 	else if municipio < arvmun^.desc_municipio then
 	  VerificarMunicipioExiste := VerificarMunicipioExiste(arvmun^.munesq, municipio)
 	else
@@ -148,8 +143,6 @@ begin
 				estado^.estesq := NovoEstado
 			else
 				estado^.estdir := NovoEstado;
-				
-			writeln('Novo Estado: ', NovoEstado^.uf);
 		end;
 				
 	end;
@@ -176,6 +169,137 @@ begin
     end;
 end;
 
+
+function AcharPosicao(var arvraiz: nodo_estados; estuf: string): nodo_estados;
+begin
+	if (arvraiz^.uf < estuf) then
+	begin 	
+		if (arvraiz^.estdir = nil) then
+			AcharPosicao := arvraiz
+		else
+			AcharPosicao := AcharPosicao(arvraiz^.estdir, estuf);	
+	end
+	else
+	begin
+		if (arvraiz^.estesq = nil) then
+			AcharPosicao := arvraiz
+		else
+			AcharPosicao := AcharPosicao(arvraiz^.estesq, estuf);	
+	end
+				
+end;
+
+function ExcluirRaizArvore(var arvraiz:nodo_estados): nodo_estados;
+var aux, NovaRaiz : nodo_estados;
+begin
+	if arvraiz^.estdir <> nil then
+	begin
+		NovaRaiz := arvraiz^.estdir;
+		NovaRaiz^.estpai := nil;
+		if arvraiz^.estesq <> nil then
+		begin
+			writeln(NovaRaiz^.uf);
+			aux := AcharPosicao(NovaRaiz, arvraiz^.estesq^.uf);
+			writeln(aux^.uf);
+			aux^.estesq := arvraiz^.estesq;
+			arvraiz^.estesq^.estpai := aux;
+		end;
+		
+	end
+	else if arvraiz^.estesq <> nil then
+	begin
+		NovaRaiz := arvraiz^.estesq
+	end;
+	dispose(arvraiz);
+	ExcluirRaizArvore := NovaRaiz;	
+		
+end;
+{
+function ExcluirRaizMun(var arvraiz:nodo_municipios): nodo_municipios;
+var aux, NovaRaiz : nodo_estados;
+begin
+	if arvraiz^.mundir <> nil then
+	begin
+		NovaRaiz := arvraiz^.mundir;
+		NovaRaiz^.munpai := nil; 
+		if arvraiz^.munesq <> nil then
+		begin
+			writeln(NovaRaiz^.desc_municipio);
+			aux := AcharPosicao(NovaRaiz, arvraiz^.munesq^.desc_municipio);
+			writeln(aux^.desc_municipio);
+			aux^.munesq := arvraiz^.munesq;
+			arvraiz^.munesq^.munpai := aux;
+		end;
+		
+	end
+	else if arvraiz^.estesq <> nil then
+	begin
+		NovaRaiz := arvraiz^.estesq
+	end;
+	dispose(arvraiz);
+	ExcluirRaizArvore := NovaRaiz;	
+		
+end; }
+
+procedure ExcluirEstado(var arvraiz: nodo_estados;estuf: string);
+var estado, aux: nodo_estados;
+begin
+	if arvraiz^.uf = estuf then
+	begin
+		arvraiz := ExcluirRaizArvore(arvraiz);
+	end
+	else
+	begin
+		estado := VerificarEstadoExiste(arvraiz, estuf);
+		if (estado^.uf = estuf) then
+			begin
+				if (estado^.estesq = nil) and (estado^.estdir = nil) then
+				begin
+					if estado = estado^.estpai^.estesq then
+						estado^.estpai^.estesq := nil	
+					else
+					  estado^.estpai^.estdir := nil;
+					dispose(estado);
+				end
+				else
+				begin
+					if estado^.estpai^.uf < estado^.uf then
+					begin
+						if estado^.estesq <> nil then
+							estado^.estpai^.estdir := estado^.estesq
+						else
+							estado^.estpai^.estdir := estado^.estdir;
+						aux := AcharPosicao(estado^.estesq, estado^.estdir^.uf);
+						aux^.estdir := estado^.estdir;
+						estado^.estdir^.estpai := aux;
+						dispose(estado);
+					
+					end
+					else
+					begin
+						if estado^.estdir <> nil then 
+							estado^.estpai^.estesq := estado^.estdir
+						else 
+							estado^.estpai^.estesq := estado^.estesq;    
+						aux := AcharPosicao(estado^.estdir, estado^.estesq^.uf);
+						aux^.estesq := estado^.estesq;
+						estado^.estesq^.estpai := aux;
+						dispose(estado);
+					end
+				end;	
+			end
+		else
+			writeln('Não da para excluir');	
+	end;
+end;
+
+procedure ExcluirMunicipio(var estraiz:nodo_estados; descmun, estuf: string);
+var municipio, estado, aux: nodo_municipios;
+begin
+	estado := VerificarEstadoExiste(estraiz, estuf);
+	municipio := VerificarMunicipioExiste(estado, descmun); 
+end;
+
 {function PosicionarMunicipio();
 begin
 end;
@@ -186,26 +310,33 @@ end;}
 
 procedure IncluirMunicipio(var arvraiz: nodo_estados; uf, municipio: string);
 var 
-		est: nodo_estados;
+    est: nodo_estados;
 begin
-    est := arvraiz;
-			
-    if VerificarEstadoExiste(arvraiz, uf)^.uf <> uf then
+    est := VerificarEstadoExiste(arvraiz, uf);
+    if (est = nil) or (est^.uf <> uf) then
         CriarEstado(arvraiz, uf);
 
-    while (est <> nil) and (est^.uf <> uf) do
+    est := VerificarEstadoExiste(arvraiz, uf);
+
+    
+    if VerificarMunicipioExiste(est^.municipio, municipio) = nil then
+        CriarMunicipio(est^.municipio, municipio)
+    else
+        writeln('Municipio já existe: ', municipio);  //depuration rsrs
+end;
+
+
+Procedure ExibirEstadosEMunicipios(Raiz: nodo_estados);
+begin
+    if Raiz <> nil then 
     begin
-        if uf < est^.uf then
-            est := est^.estesq
-        else
-            est := est^.estdir;
+        writeln('Estado: ', Raiz^.uf);
+        write('Municípios: ');
+        ExibirMunicipios(Raiz^.municipio);
+        writeln;
+        ExibirEstadosEMunicipios(Raiz^.estesq);
+        ExibirEstadosEMunicipios(Raiz^.estdir);
     end;
-	
-	//condicional para adicionar o municipio na árvore desse estado
-	if (est <> nil) and (not VerificarMunicipioExiste(est^.municipio, municipio)) then
-		CriarMunicipio(est^.municipio, municipio)
-	else
-		writeln('Municipio já existe: ', municipio); //depuration, teste rs
 end;
 
 {procedure ExcluirMunicipio();
@@ -223,39 +354,45 @@ var
 begin
 	repeat
 		writeln('0 - FECHAR PROGRAMA ');
-		writeln('1 - INSERE ESTADO');
-		writeln('2 - INSERE MUNICIPIO');
-		writeln('3 - EXIBIR ARVORE EM ORDEM');
-		writeln('4 - EXIBIR ARVORE EM PRE-ORDEM');
+		writeln('1 - INSERE MUNICIPIO');
+		writeln('2 - EXIBIR ARVORE EM ORDEM');
+		writeln('3 - EXIBIR ARVORE EM ORDEM COM OS MUNICIPIOS');
+		writeln('4 - EXCLUSAO');
 		write('Escolha uma opção: ');
 		readln(op);
 	
 		case op of
-			1: begin
-					writeln('Digite a sigla do estado a ser adicionado: ');
-					readln(uf);
-					CriarEstado(estados, uf);
-			   end;
 			 
-			2: begin
+			1: begin
 					writeln('Digite a sigla do estado: ');                   
 					readln(uf);
 					writeln('Digite o nome do município: ' );
 					readln(municipio);
 					IncluirMunicipio(estados, uf, municipio);
+					clrscr;
 			   end;
 			 
-			3: begin
+			2: begin
 					writeln('Exibindo árvore em ordem:');
+					clrscr;
 					EmOrdem(estados);
 					writeln;
 			   end;
 			 
-			4: begin
-					writeln('Exibindo árvore em pré-ordem:');
-					PreOrdem(estados);
+			3: begin
+					writeln('Exibindo árvore em ordem:');
+					clrscr;
+					EmOrdem(estados);
 					writeln;
 			   end;
+			
+			4: begin
+				 writeln('Digite o município a ser excluido: ');
+				 readln(municipio);
+				 writeln('Digite o estado do município a ser excluido: ');
+				 readln(uf);
+				 ExcluirMunicipio(estados, municipio, uf);
+				 end;
 			
 			0: writeln('Saindo do programa...');
 			
@@ -270,11 +407,4 @@ Begin
 
   IniciarVariaveis(estados);
 	ProcessarOpcao;
-	{IniciarVariaveis(estados);
-  CriarEstado(estados, 'SC');
-  CriarEstado(estados, 'SC');
-  CriarEstado(estados, 'BB');
-  CriarEstado(estados, 'ZZ');
-  writeln;
-  EmOrdem(estados); }
 End.
