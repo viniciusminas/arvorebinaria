@@ -140,14 +140,14 @@ begin
 		if (arvraiz^.estdir = nil) then
 			AcharPosicao := arvraiz
 		else
-			AcharPosicao(arvraiz^.estdir, estuf);	
+			AcharPosicao := AcharPosicao(arvraiz^.estdir, estuf);	
 	end
 	else
 	begin
 		if (arvraiz^.estesq = nil) then
 			AcharPosicao := arvraiz
 		else
-			AcharPosicao(arvraiz^.estesq, estuf);	
+			AcharPosicao := AcharPosicao(arvraiz^.estesq, estuf);	
 	end
 				
 end;
@@ -183,7 +183,7 @@ var estado, aux: nodo_estados;
 begin
 	if arvraiz^.uf = estuf then
 	begin
-		writeln('Raiz da Árvore');
+		arvraiz := ExcluirRaizArvore(arvraiz);
 	end
 	else
 	begin
@@ -206,28 +206,22 @@ begin
 							estado^.estpai^.estdir := estado^.estesq
 						else
 							estado^.estpai^.estdir := estado^.estdir;
-						writeln(estado^.estpai^.estdir^.uf, ' ', estado^.estpai^.estesq^.uf);
 						aux := AcharPosicao(estado^.estesq, estado^.estdir^.uf);
 						aux^.estdir := estado^.estdir;
 						estado^.estdir^.estpai := aux;
-						estado^.estesq^.estdir := estado^.estdir;
 						dispose(estado);
-						//writeln('Novo Pai: ', AcharPosicao(estado^.estesq, estuf)^.uf);
+					
 					end
 					else
 					begin
 						if estado^.estdir <> nil then 
 							estado^.estpai^.estesq := estado^.estdir
-						else
-							estado^.estpai^.estesq := estado^.estesq;
-							
-						writeln(estado^.estpai^.estdir^.uf, ' ', estado^.estpai^.estesq^.uf);
+						else 
+							estado^.estpai^.estesq := estado^.estesq;    
 						aux := AcharPosicao(estado^.estdir, estado^.estesq^.uf);
 						aux^.estesq := estado^.estesq;
 						estado^.estesq^.estpai := aux;
-						estado^.estdir^.estesq := estado^.estesq;
 						dispose(estado);
-						writeln(arvraiz^.estdir^.estesq^.uf, ' ', arvraiz^.estdir^.estdir^.uf);
 					end
 				end;	
 			end
@@ -264,21 +258,22 @@ Begin
 	IniciarVariaveis(estados);
   CriarEstado(estados, 'SC');
   CriarEstado(estados, 'SC');
-  CriarEstado(estados, 'BB');
+  //CriarEstado(estados, 'BB');
   CriarEstado(estados, 'VV');
-  CriarEstado(estados, 'YY');
+  {CriarEstado(estados, 'YY');
   CriarEstado(estados, 'ZZ');
   CriarEstado(estados, 'TT');
   CriarEstado(estados, 'RR');
   CriarEstado(estados, 'SB');
   CriarEstado(estados, 'SS');
   CriarEstado(estados, 'UU');
-  CriarEstado(estados, 'XX');
+  CriarEstado(estados, 'XX');}
   
   writeln;
   EmOrdem(estados);
   writeln;
-  ExcluirEstado(estados, 'ZZ');
+  ExcluirEstado(estados, 'SC');
   writeln;
-  EmOrdem(estados); 
+  EmOrdem(estados);
+  readkey;
 End.
