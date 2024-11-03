@@ -347,10 +347,10 @@ var
 begin
 	repeat
 		writeln('0 - FECHAR PROGRAMA ');
-		writeln('1 - INSERE ESTADO');
-		writeln('2 - INSERE MUNICIPIO');
-		writeln('3 - EXIBIR ARVORE EM ORDEM');
-		writeln('4 - EXIBIR ARVORE EM PRE-ORDEM');
+		writeln('1 - INSERE MUNICIPIO');
+		writeln('2 - EXIBIR ARVORE EM ORDEM');
+		writeln('3 - EXIBIR ARVORE EM ORDEM OS MUNICIPIOS');
+		writeln('4 - EXCLUSAO');
 		write('Escolha uma opção: ');
 		readln(op);
 	
@@ -359,7 +359,6 @@ begin
 			1: begin
 					writeln('Digite a sigla do estado: ');                   
 					readln(uf);
-					CriarEstado(estados, uf);
 					writeln('Digite o nome do município: ' );
 					readln(municipio);
 					IncluirMunicipio(estados, uf, municipio);
@@ -385,7 +384,7 @@ begin
 				 readln(municipio);
 				 writeln('Digite o estado do município a ser excluido: ');
 				 readln(uf);
-				 VerificarMunicipioExiste(estados, municipio, uf);
+				 ExcluirMunicipio(estados, municipio, uf);
 				 end;
 			
 			0: writeln('Saindo do programa...');
