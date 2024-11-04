@@ -303,6 +303,8 @@ begin
 							estado^.estpai^.estdir := estado^.estdir;
 						aux := AcharPosicao(estado^.estesq, estado^.estdir^.uf);
 						aux^.estdir := estado^.estdir;
+						if aux^.estpai = estado then
+							aux^.estpai := estado^.estpai;
 						estado^.estdir^.estpai := aux;
 						dispose(estado);
 					
@@ -315,6 +317,8 @@ begin
 							estado^.estpai^.estesq := estado^.estesq;    
 						aux := AcharPosicao(estado^.estdir, estado^.estesq^.uf);
 						aux^.estesq := estado^.estesq;
+						if aux^.estpai = estado then
+							aux^.estpai := estado^.estpai;	
 						estado^.estesq^.estpai := aux;
 						dispose(estado);
 					end
@@ -328,7 +332,9 @@ end;
 procedure ExcluirMunicipio(var estraiz:nodo_estados; descmun, estuf: string);
 var municipio, aux: nodo_municipios; 
     estado: nodo_estados;
+    escluirEst : boolean;
 begin
+	escluirEst := false;
 	estado := VerificarEstadoExiste(estraiz, estuf);
 	writeln('estmun: ', estado^.municipio^.desc_municipio);
 	municipio := VerificarMunicipioExiste(estado^.municipio, descmun);
@@ -343,7 +349,13 @@ begin
 		writeln('Municipio: ', municipio^.desc_municipio);
 		writeln;
 		if municipio^.desc_municipio = estraiz^.municipio^.desc_municipio then
-				estado^.municipio :=  ExcluirRaizMun(municipio)
+		begin
+				if (municipio^.munesq = nil) and (municipio^.mundir = nil) then
+					escluirEst := true;
+				estado^.municipio :=  ExcluirRaizMun(municipio);
+				if escluirEst = true then
+					ExcluirEstado(estraiz, estuf);
+		end
 		else
 		begin
 			if (municipio^.munesq = nil) and (municipio^.mundir = nil) then
@@ -363,9 +375,13 @@ begin
 						else
 							municipio^.munpai^.mundir := municipio^.mundir;
 						aux := AcharPosicaoMun(municipio^.munesq, municipio^.mundir^.desc_municipio);
+						writeln('Aux: ', aux^.desc_municipio);
 						aux^.mundir := municipio^.mundir;
 						municipio^.mundir^.munpai := aux;
-						dispose(estado);
+						if aux^.munpai = municipio then
+							aux^.munpai := municipio^.munpai;
+						writeln('paiesq: ', municipio^.munpai^.desc_municipio);
+						dispose(municipio);
 					
 					end
 					else
@@ -375,8 +391,12 @@ begin
 						else 
 							municipio^.munpai^.munesq := municipio^.munesq;    
 						aux := AcharPosicaoMun(municipio^.mundir, municipio^.munesq^.desc_municipio);
+						writeln('Aux2: ', aux^.desc_municipio);
 						aux^.munesq := municipio^.munesq;
 						municipio^.munesq^.munpai := aux;
+						if aux^.munpai = municipio then
+							aux^.munpai := municipio^.munpai;
+						writeln('paiesq: ', aux^.munpai^.desc_municipio);
 						dispose(municipio);
 					end
 			end
@@ -493,17 +513,20 @@ end;
 Begin
 
   IniciarVariaveis(estados);
-	IncluirMunicipio(estados, 'SP', 'São Paulo');
-	IncluirMunicipio(estados, 'SP', 'São Paulo');
-	IncluirMunicipio(estados, 'SP', 'Campinas');
-	IncluirMunicipio(estados, 'SP', 'Santos');
-	IncluirMunicipio(estados, 'SP', 'Sorocaba');
-	IncluirMunicipio(estados, 'SP', 'Ribeirão Preto');
-	IncluirMunicipio(estados, 'SP', 'São Bernardo do Campo');
-	IncluirMunicipio(estados, 'SP', 'São José dos Campos');
-	IncluirMunicipio(estados, 'SP', 'Osasco');
-	IncluirMunicipio(estados, 'SP', 'Mauá');
-	IncluirMunicipio(estados, 'SP', 'Bauru');
+	IncluirMunicipio(estados, 'SP', 'MM');
+	IncluirMunicipio(estados, 'SP', 'MM');
+	IncluirMunicipio(estados, 'SP', 'EE');
+	IncluirMunicipio(estados, 'SP', 'SS');
+	IncluirMunicipio(estados, 'SP', 'CC');
+	IncluirMunicipio(estados, 'SP', 'BB');
+	IncluirMunicipio(estados, 'SP', 'DD');
+	IncluirMunicipio(estados, 'SP', 'AA');
+	IncluirMunicipio(estados, 'SP', 'FF');
+	IncluirMunicipio(estados, 'SP', 'YY');
+	IncluirMunicipio(estados, 'SP', 'ZZ');
+	IncluirMunicipio(estados, 'SP', 'NN');
+	IncluirMunicipio(estados, 'SP', 'OO');
+	IncluirMunicipio(estados, 'SP', 'NA');
 	
 	IncluirMunicipio(estados, 'RJ', 'Rio de Janeiro');
 	IncluirMunicipio(estados, 'RJ', 'Niterói');
