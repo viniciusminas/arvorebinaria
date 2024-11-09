@@ -64,13 +64,13 @@ begin
 		VerificarNoExiste := nil
 	else if arv^.nome = conteudo then //se o nome inserido ja existe no nó
 		VerificarNoExiste := arv
-	else if conteudo < arv^.conteudo^.nome then
+	else if conteudo < arv^.nome then
 	  VerificarNoExiste := VerificarNoExiste(arv^.arvesq, conteudo)
 	else
-      VerificarNoExiste := VerificarNoExiste(arv^.arvdir, conteudo); 
+      VerificarNoExiste := VerificarNoExiste(arv^.arvdir, conteudo);  
 end;
 
-function CriarNo(var arv: arvore; arvpai:arvore; conteudo: string): arvore;
+function CriarNo(var arv, arvpai:arvore; conteudo: string): arvore;
 var novoNo: arvore;
 begin
     new(novoNo);
@@ -83,7 +83,8 @@ begin
     if arv = nil then
     begin
         arv := novoNo;
-        arv^.arvpai := arvpai;
+        if arv <> arvpai then
+        	arv^.arvpai := arvpai;
         CriarNo := arv;
     end
     else
@@ -122,6 +123,89 @@ begin
 		writeln('Municipio já existe: ', municipio); //depuration, teste rs
 end;
 
+function AcharPosicao(var arvraiz: arvore; nome: string): arvore;
+begin
+	if (arvraiz^.nome < nome) then
+	begin 	
+		if (arvraiz^.arvdir = nil) then
+			AcharPosicao := arvraiz
+		else
+			AcharPosicao := AcharPosicao(arvraiz^.arvdir, nome);	
+	end
+	else
+	begin
+		if (arvraiz^.arvesq = nil) then
+			AcharPosicao := arvraiz
+		else
+			AcharPosicao := AcharPosicao(arvraiz^.arvesq, nome);	
+	end
+				
+end;
+
+procedure ExcluirCentral(pai, no:arvore);
+var aux:arvore;
+begin
+	if pai^.nome < no^.nome then
+	begin
+		if no^.arvesq <> nil then
+			pai^.arvdir := no^.arvesq
+		else
+			pai^.arvdir := no^.arvdir;		
+		aux := AcharPosicao(no^.arvesq, no^.arvdir^.nome);
+		aux^.arvdir := no^.arvdir;
+		no^.arvdir^.arvpai := aux;
+		if aux^.arvpai = no then
+			aux^.arvpai := no^.arvpai;
+		writeln('AUXPAI: ',aux^.arvpai^.nome);
+		dispose(no);
+	
+	end
+	else
+	begin
+		if no^.arvdir <> nil then 
+			pai^.arvesq := no^.arvdir
+		else 
+			pai^.arvesq := no^.arvesq;  
+			  
+		aux := AcharPosicao(no^.arvdir, no^.arvesq^.nome);
+		aux^.arvesq := no^.arvesq;
+		no^.arvesq^.arvpai := aux;
+		if aux^.arvpai = no then
+			aux^.arvpai := no^.arvpai;
+		writeln('AUXPAI: ',no^.arvesq^.arvpai^.nome);
+		dispose(no);
+	end
+
+end;
+
+procedure ExcluirFolha(pai, no:arvore);
+begin
+	if pai^.arvesq = no then
+		pai^.arvesq := nil
+	else
+		pai^.arvdir := nil;
+	dispose(no);
+end;
+
+procedure ExcluirNo(var estado: arvore; uf, municipio: string); 
+var	no_exc, arv_exc, estado_exc: arvore;																																							 
+begin
+	estado_exc := VerificarNoExiste(estado, uf);
+	writeln('Estado ', estado_exc^.nome);
+	if estado_exc^.conteudo = nil then
+		no_exc := estado_exc
+	else 
+		no_exc := VerificarNoExiste(estado_exc^.conteudo, municipio);
+	
+	writeln('PAI: ', no_exc^.arvpai^.nome, ' No exc: ', no_exc^.nome);
+	writeln;
+	if (no_exc^.arvpai = nil) then //Excluir Raiz
+		writeln('Excluir Raiz')
+	else if (no_exc^.arvesq = nil) and (no_exc^.arvdir = nil) then //Excluir folha
+		ExcluirFolha(no_exc^.arvpai, no_exc)
+	else
+		ExcluirCentral(no_exc^.arvpai, no_exc);
+end;
 
 Begin  
 
@@ -129,20 +213,25 @@ Begin
 	IncluirMunicipio(estado, 'SC', 'Jaraguá');
 	IncluirMunicipio(estado, 'SC', 'Ituporanga');
 	IncluirMunicipio(estado, 'SC', 'Rio do Sul');
-	IncluirMunicipio(estado, 'ZZ', 'AA');
-	IncluirMunicipio(estado, 'PE', 'AA');
-	IncluirMunicipio(estado, 'AA', 'AA');
-	IncluirMunicipio(estado, 'BB', 'AA'); 
-	{CriarNo(estado, estado, 'SC');
+	IncluirMunicipio(estado, 'SC', 'AA');
+	IncluirMunicipio(estado, 'SC', 'BB');
+	IncluirMunicipio(estado, 'SC', 'AC');
+	IncluirMunicipio(estado, 'SC', 'ZZ'); 
+	CriarNo(estado, estado, 'SC');
 	CriarNo(estado, estado, 'SP');
 	CriarNo(estado, estado, 'MG');
 	CriarNo(estado, estado, 'ZZ');
 	CriarNo(estado, estado, 'PE');
 	CriarNo(estado, estado, 'AA');
 	CriarNo(estado, estado, 'BB');
-	CriarNo(estado, estado, 'CC');
+	CriarNo(estado, estado, 'AC');
 	CriarNo(estado, estado, 'NN');
-	CriarNo(estado, estado, 'LL');}
+	CriarNo(estado, estado, 'LL');
+	EmOrdem(estado^.conteudo);
+	writeln;
+	ExcluirNo(estado, 'SC', 'Ituporanga');
+	EmOrdem(estado^.conteudo);
+	ExcluirNo(estado, 'SC', 'AA');
 	EmOrdem(estado^.conteudo);
 
 End.
