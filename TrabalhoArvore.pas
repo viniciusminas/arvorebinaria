@@ -42,12 +42,35 @@ begin
     end;
 end;
 
-Procedure PreOrdem(Raiz: arvore);
+{Procedure PreOrdem(Raiz: arvore);
 begin
     if Raiz <> nil then 
     begin
         write(Raiz^.nome, '-');
         ExibirNo(Raiz); //teste para mostrar os mun's.
+        PreOrdem(Raiz^.arvesq);
+        PreOrdem(Raiz^.arvdir);
+    end;
+end;  }
+
+
+Procedure ExibirMunicipios(RaizMunicipio: arvore);
+begin
+	if RaizMunicipio <> nil then
+	begin
+		write(RaizMunicipio^.nome, ', ');
+		ExibirMunicipios(RaizMunicipio^.arvesq);
+		ExibirMunicipios(RaizMunicipio^.arvdir);
+	end;
+end;
+
+Procedure PreOrdem(Raiz: arvore);
+begin
+    if Raiz <> nil then 
+    begin
+        write(Raiz^.nome, '-');
+        ExibirMunicipios(Raiz^.conteudo); //teste para mostrar os mun's.
+        writeln;
         PreOrdem(Raiz^.arvesq);
         PreOrdem(Raiz^.arvdir);
     end;
@@ -209,29 +232,21 @@ end;
 
 Begin  
 
-	IniciarVariaveis(estado);
-	IncluirMunicipio(estado, 'SC', 'Jaraguá');
-	IncluirMunicipio(estado, 'SC', 'Ituporanga');
-	IncluirMunicipio(estado, 'SC', 'Rio do Sul');
-	IncluirMunicipio(estado, 'SC', 'AA');
-	IncluirMunicipio(estado, 'SC', 'BB');
-	IncluirMunicipio(estado, 'SC', 'AC');
-	IncluirMunicipio(estado, 'SC', 'ZZ'); 
-	CriarNo(estado, estado, 'SC');
-	CriarNo(estado, estado, 'SP');
-	CriarNo(estado, estado, 'MG');
-	CriarNo(estado, estado, 'ZZ');
-	CriarNo(estado, estado, 'PE');
-	CriarNo(estado, estado, 'AA');
-	CriarNo(estado, estado, 'BB');
-	CriarNo(estado, estado, 'AC');
-	CriarNo(estado, estado, 'NN');
-	CriarNo(estado, estado, 'LL');
-	EmOrdem(estado^.conteudo);
-	writeln;
-	ExcluirNo(estado, 'SC', 'Ituporanga');
-	EmOrdem(estado^.conteudo);
-	ExcluirNo(estado, 'SC', 'AA');
-	EmOrdem(estado^.conteudo);
+    IniciarVariaveis(estado);
+
+    IncluirMunicipio(estado, 'SC', 'Florianópolis');
+    IncluirMunicipio(estado, 'SC', 'Blumenau');
+    IncluirMunicipio(estado, 'PR', 'Curitiba');
+    IncluirMunicipio(estado, 'PR', 'Londrina');
+    IncluirMunicipio(estado, 'RS', 'Porto Alegre');
+
+    writeln('Exibindo estados em ordem:');
+    EmOrdem(estado);
+    writeln;
+    writeln;
+    PreOrdem(estado);
+    writeln;
+
+
 
 End.
