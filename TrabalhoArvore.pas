@@ -19,7 +19,7 @@ begin
 		ExibirNo(Raiz^.arvdir);
 	end;
 end;
-	
+
 
 
 Procedure EmOrdem(Raiz: arvore);
@@ -31,28 +31,6 @@ begin
         EmOrdem(Raiz^.arvdir);
     end;
 end;
-
-Procedure EmOrdemMun(Raiz: arvore);
-begin
-    if Raiz <> nil then 
-    begin
-        EmOrdemMun(Raiz^.arvesq);
-        write(Raiz^.nome, '-');
-        EmOrdemMun(Raiz^.arvdir);
-    end;
-end;
-
-{Procedure PreOrdem(Raiz: arvore);
-begin
-    if Raiz <> nil then 
-    begin
-        write(Raiz^.nome, '-');
-        ExibirNo(Raiz); //teste para mostrar os mun's.
-        PreOrdem(Raiz^.arvesq);
-        PreOrdem(Raiz^.arvdir);
-    end;
-end;  }
-
 
 Procedure ExibirMunicipios(RaizMunicipio: arvore);
 begin
@@ -76,6 +54,16 @@ begin
     end;
 end;
 
+Procedure EmOrdemMun(Raiz: arvore);
+begin
+    if Raiz <> nil then 
+    begin
+        EmOrdemMun(Raiz^.arvesq);
+        write(Raiz^.nome, '-');
+        EmOrdemMun(Raiz^.arvdir);
+    end;
+end;
+
 procedure IniciarVariaveis(var est: arvore);
 begin
 	est := nil;	
@@ -93,22 +81,22 @@ begin
       VerificarNoExiste := VerificarNoExiste(arv^.arvdir, conteudo);  
 end;
 
-function CriarNo(var arv, arvpai:arvore; conteudo: string): arvore;
+function CriarNo(var arv:arvore; arvpai:arvore; conteudo: string): arvore;
 var novoNo: arvore;
 begin
-    new(novoNo);
-    novoNo^.nome := conteudo;
-    novoNo^.arvesq := nil;
-    novoNo^.arvdir := nil;           
-    novoNo^.arvpai := nil;
-    CriarNo := novoNo;
-
     if arv = nil then
     begin
-        arv := novoNo;
-        if arv <> arvpai then
-        	arv^.arvpai := arvpai;
-        CriarNo := arv;
+    	new(novoNo);
+	    novoNo^.nome := conteudo;
+	    novoNo^.arvesq := nil;
+	    novoNo^.arvdir := nil;           
+	    novoNo^.arvpai := nil;
+	    //CriarNo := novoNo;
+
+      arv := novoNo;
+      if arv <> arvpai then
+      	arv^.arvpai := arvpai;
+      CriarNo := arv;
     end
     else
     begin
@@ -121,16 +109,15 @@ end;
 
 procedure IncluirMunicipio(var arvraiz: arvore; uf, municipio: string);
 var 
-		est: arvore;
+		est, estado: arvore;
 begin
     est := VerificarNoExiste(arvraiz, uf);	
     if est = nil then
     begin
-        est := CriarNo(arvraiz, arvraiz, uf);           
+        CriarNo(arvraiz, arvraiz^.arvpai, uf);           
     end;
+    est := VerificarNoExiste(arvraiz, uf);
     
-    writeln('Estado: ', est^.nome);
-
     while (est <> nil) and (est^.nome <> uf) do
     begin
         if uf < est^.nome then
@@ -168,37 +155,80 @@ end;
 procedure ExcluirCentral(pai, no:arvore);
 var aux:arvore;
 begin
+	
 	if pai^.nome < no^.nome then
 	begin
 		if no^.arvesq <> nil then
-			pai^.arvdir := no^.arvesq
+		begin
+			pai^.arvdir := no^.arvesq;
+			no^.arvesq^.arvpai := pai;
+			if no^.arvdir <> nil then
+			begin
+				aux := AcharPosicao(no^.arvesq, no^.arvdir^.nome);
+				aux^.arvdir := no^.arvdir;
+				if aux^.arvpai = no then
+					aux^.arvpai := no^.arvpai;				
+				no^.arvdir^.arvpai := aux;
+			end
+		end
 		else
+		begin
 			pai^.arvdir := no^.arvdir;		
-		aux := AcharPosicao(no^.arvesq, no^.arvdir^.nome);
-		aux^.arvdir := no^.arvdir;
-		no^.arvdir^.arvpai := aux;
-		if aux^.arvpai = no then
-			aux^.arvpai := no^.arvpai;
-		writeln('AUXPAI: ',aux^.arvpai^.nome);
+			no^.arvdir^.arvpai := no^.arvpai;
+		end;
 		dispose(no);
 	
 	end
 	else
 	begin
 		if no^.arvdir <> nil then 
-			pai^.arvesq := no^.arvdir
-		else 
+		begin
+			pai^.arvesq := no^.arvdir;
+			no^.arvdir^.arvpai := pai;
+			if no^.arvesq <> nil then
+			begin
+				aux := AcharPosicao(no^.arvdir, no^.arvesq^.nome);
+				aux^.arvesq := no^.arvesq;
+				
+				if aux^.arvpai = no then
+					aux^.arvpai := no^.arvpai;
+				no^.arvesq^.arvpai := aux;
+			end
+		end
+		else
+		begin 
 			pai^.arvesq := no^.arvesq;  
-			  
-		aux := AcharPosicao(no^.arvdir, no^.arvesq^.nome);
-		aux^.arvesq := no^.arvesq;
-		no^.arvesq^.arvpai := aux;
-		if aux^.arvpai = no then
-			aux^.arvpai := no^.arvpai;
-		writeln('AUXPAI: ',no^.arvesq^.arvpai^.nome);
+		  no^.arvesq^.arvpai := no^.arvpai;
+		end;
 		dispose(no);
-	end
+	end;
+end;
 
+function ExcluirRaizArvore(var arvraiz:arvore): arvore;
+var aux, NovaRaiz : arvore;
+begin
+	writeln;
+	if arvraiz^.arvdir <> nil then
+	begin
+		NovaRaiz := arvraiz^.arvdir;
+		NovaRaiz^.arvpai := nil;
+		if arvraiz^.arvesq <> nil then
+		begin
+			writeln(NovaRaiz^.nome);
+			aux := AcharPosicao(NovaRaiz, arvraiz^.arvesq^.nome);
+			writeln(aux^.nome);
+			aux^.arvesq := arvraiz^.arvesq;
+			arvraiz^.arvesq^.arvpai := aux;
+		end;
+		
+	end
+	else if arvraiz^.arvesq <> nil then
+	begin
+		NovaRaiz := arvraiz^.arvesq
+	end;
+	dispose(arvraiz);
+	ExcluirRaizArvore := NovaRaiz;	
+		
 end;
 
 procedure ExcluirFolha(pai, no:arvore);
@@ -211,42 +241,52 @@ begin
 end;
 
 procedure ExcluirNo(var estado: arvore; uf, municipio: string); 
-var	no_exc, arv_exc, estado_exc: arvore;																																							 
+var	no_exc, no_exc_cont, estado_exc_pai, arv_exc, estado_exc: arvore;																																							 
 begin
 	estado_exc := VerificarNoExiste(estado, uf);
-	writeln('Estado ', estado_exc^.nome);
+	estado_exc_pai := estado_exc^.arvpai;
 	if estado_exc^.conteudo = nil then
 		no_exc := estado_exc
 	else 
 		no_exc := VerificarNoExiste(estado_exc^.conteudo, municipio);
-	
-	writeln('PAI: ', no_exc^.arvpai^.nome, ' No exc: ', no_exc^.nome);
-	writeln;
 	if (no_exc^.arvpai = nil) then //Excluir Raiz
-		writeln('Excluir Raiz')
+	begin
+		no_exc_cont := ExcluirRaizArvore(no_exc);
+		if no_exc_cont = nil then
+		begin
+			estado_exc^.conteudo := nil;
+			if estado = estado_exc then
+				estado := ExcluirRaizArvore(estado)
+			else
+				ExcluirNo(estado, estado_exc^.nome, 'nada');
+		end
+		else 
+			estado_exc^.conteudo := no_exc_cont;
+	end
 	else if (no_exc^.arvesq = nil) and (no_exc^.arvdir = nil) then //Excluir folha
 		ExcluirFolha(no_exc^.arvpai, no_exc)
+	else if no_exc^.arvpai <> nil then
+		ExcluirCentral(no_exc^.arvpai, no_exc)
 	else
-		ExcluirCentral(no_exc^.arvpai, no_exc);
+		writeln('Município Inexistente!');
 end;
 
 Begin  
-
-    IniciarVariaveis(estado);
-
-    IncluirMunicipio(estado, 'SC', 'Florianópolis');
-    IncluirMunicipio(estado, 'SC', 'Blumenau');
-    IncluirMunicipio(estado, 'PR', 'Curitiba');
-    IncluirMunicipio(estado, 'PR', 'Londrina');
-    IncluirMunicipio(estado, 'RS', 'Porto Alegre');
-
-    writeln('Exibindo estados em ordem:');
-    EmOrdem(estado);
-    writeln;
-    writeln;
-    PreOrdem(estado);
-    writeln;
-
+	IniciarVariaveis(estado);
+	IncluirMunicipio(estado, 'SC', 'YY');
+	IncluirMunicipio(estado, 'SP', 'YY');
+  IncluirMunicipio(estado, 'SM', 'YY');
+  IncluirMunicipio(estado, 'AA', 'YY');
+	IncluirMunicipio(estado, 'BB', 'YY');
+	IncluirMunicipio(estado, 'CC', 'YY');
+	IncluirMunicipio(estado, 'AB', 'YY');
+	IncluirMunicipio(estado, 'XX', 'YY'); 
+	IncluirMunicipio(estado, 'ZZ', 'YY'); 
+	//CriarNo(estado, estado, 'SC');
+	EmOrdem(estado);
+	writeln;
+	ExcluirNo(estado, 'ZZ', 'YY');
+	EmOrdem(estado);
 
 
 End.
