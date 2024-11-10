@@ -8,7 +8,9 @@ type
         arvdir, arvesq, arvpai: arvore;
     end;
 
-var  estado : arvore;
+var  estado, est, mun : arvore;
+     opcao:integer;
+     uf, municipio:string;
 
 Procedure ExibirNo(Raiz: arvore);
 begin
@@ -36,8 +38,8 @@ Procedure ExibirMunicipios(RaizMunicipio: arvore);
 begin
 	if RaizMunicipio <> nil then
 	begin
-		write(RaizMunicipio^.nome, ', ');
 		ExibirMunicipios(RaizMunicipio^.arvesq);
+		write(RaizMunicipio^.nome, ', ');
 		ExibirMunicipios(RaizMunicipio^.arvdir);
 	end;
 end;
@@ -47,9 +49,11 @@ begin
     if Raiz <> nil then 
     begin
         write(Raiz^.nome, '-');
+        write('  | Raiz: ', Raiz^.conteudo^.nome, ' | Estados: ');
         ExibirMunicipios(Raiz^.conteudo); //teste para mostrar os mun's.
         writeln;
-        PreOrdem(Raiz^.arvesq);
+        writeln;
+        PreOrdem(Raiz^.arvesq); 
         PreOrdem(Raiz^.arvdir);
     end;
 end;
@@ -61,6 +65,33 @@ begin
         EmOrdemMun(Raiz^.arvesq);
         write(Raiz^.nome, '-');
         EmOrdemMun(Raiz^.arvdir);
+    end;
+end;
+
+Procedure Contar(Raiz: arvore; var count: integer);
+begin
+    if Raiz <> nil then 
+    begin
+        Contar(Raiz^.arvesq, count);
+        count := count + 1; // realiza a contagem
+        Contar(Raiz^.arvdir, count);
+    end;
+end;
+
+procedure ContarMunicipiosPorEstado(raizEstado: arvore);
+var
+    totalMunicipios: integer;
+begin
+    if raizEstado <> nil then
+    begin
+        ContarMunicipiosPorEstado(raizEstado^.arvesq);  // acessar  o no filho esquerdo desta UF
+
+        totalMunicipios := 0;  // carrega novamente
+        Contar(raizEstado^.conteudo, totalMunicipios);  // contagem de municipios do UF
+        
+        writeln('Estado: ', raizEstado^.nome, ' - Municípios cadastrados: ', totalMunicipios);  // AMOSTRA
+        
+        ContarMunicipiosPorEstado(raizEstado^.arvdir);
     end;
 end;
 
@@ -78,7 +109,7 @@ begin
 	else if conteudo < arv^.nome then
 	  VerificarNoExiste := VerificarNoExiste(arv^.arvesq, conteudo)
 	else
-      VerificarNoExiste := VerificarNoExiste(arv^.arvdir, conteudo);  
+      VerificarNoExiste := VerificarNoExiste(arv^.arvdir, conteudo);        
 end;
 
 function CriarNo(var arv:arvore; arvpai:arvore; conteudo: string): arvore;
@@ -207,7 +238,7 @@ end;
 function ExcluirRaizArvore(var arvraiz:arvore): arvore;
 var aux, NovaRaiz : arvore;
 begin
-	writeln;
+	writeln;                                           
 	if arvraiz^.arvdir <> nil then
 	begin
 		NovaRaiz := arvraiz^.arvdir;
@@ -224,7 +255,8 @@ begin
 	end
 	else if arvraiz^.arvesq <> nil then
 	begin
-		NovaRaiz := arvraiz^.arvesq
+		NovaRaiz := arvraiz^.arvesq;
+		NovaRaiz^.arvpai := nil;
 	end;
 	dispose(arvraiz);
 	ExcluirRaizArvore := NovaRaiz;	
@@ -249,8 +281,10 @@ begin
 		no_exc := estado_exc
 	else 
 		no_exc := VerificarNoExiste(estado_exc^.conteudo, municipio);
+
 	if (no_exc^.arvpai = nil) then //Excluir Raiz
 	begin
+		writeln('Excluindo a Raiz');
 		no_exc_cont := ExcluirRaizArvore(no_exc);
 		if no_exc_cont = nil then
 		begin
@@ -269,24 +303,198 @@ begin
 		ExcluirCentral(no_exc^.arvpai, no_exc)
 	else
 		writeln('Município Inexistente!');
+
+end;
+
+procedure ExibirMenu;
+begin
+    writeln('0 - Sair');
+    writeln('1 - Incluir Estado e Município');
+    writeln('2 - Excluir Estado ou Município');
+    writeln('3 - Exibir Estados em Ordem');
+    writeln('4 - Exibir Estados e Municípios em Pré-Ordem');
+		writeln('5 - Contagem de quantos elementos cada UF tem cadastrado');    
 end;
 
 Begin  
-	IniciarVariaveis(estado);
-	IncluirMunicipio(estado, 'SC', 'YY');
+  IniciarVariaveis(estado);
+	IncluirMunicipio(estado, 'SP', 'MM');
+	IncluirMunicipio(estado, 'SP', 'MM');
+	IncluirMunicipio(estado, 'SP', 'EE');
+	IncluirMunicipio(estado, 'SP', 'SS');
+	IncluirMunicipio(estado, 'SP', 'CC');
+	IncluirMunicipio(estado, 'SP', 'BB');
+	IncluirMunicipio(estado, 'SP', 'DD');
+	IncluirMunicipio(estado, 'SP', 'AA');
+	IncluirMunicipio(estado, 'SP', 'FF');
 	IncluirMunicipio(estado, 'SP', 'YY');
-  IncluirMunicipio(estado, 'SM', 'YY');
-  IncluirMunicipio(estado, 'AA', 'YY');
-	IncluirMunicipio(estado, 'BB', 'YY');
-	IncluirMunicipio(estado, 'CC', 'YY');
-	IncluirMunicipio(estado, 'AB', 'YY');
-	IncluirMunicipio(estado, 'XX', 'YY'); 
-	IncluirMunicipio(estado, 'ZZ', 'YY'); 
-	//CriarNo(estado, estado, 'SC');
-	EmOrdem(estado);
-	writeln;
-	ExcluirNo(estado, 'ZZ', 'YY');
-	EmOrdem(estado);
+	IncluirMunicipio(estado, 'SP', 'ZZ');
+	IncluirMunicipio(estado, 'SP', 'NN');
+	IncluirMunicipio(estado, 'SP', 'OO');
+	IncluirMunicipio(estado, 'SP', 'NA');
+	
+	{IncluirMunicipio(estado, 'RJ', 'Rio de Janeiro');
+	IncluirMunicipio(estado, 'RJ', 'Niterói');
+	IncluirMunicipio(estado, 'RJ', 'Nova Iguaçu');
+	IncluirMunicipio(estado, 'RJ', 'Duque de Caxias');
+	IncluirMunicipio(estado, 'RJ', 'Volta Redonda');
+	IncluirMunicipio(estado, 'RJ', 'Macaé');
+	IncluirMunicipio(estado, 'RJ', 'Cabo Frio');
+	IncluirMunicipio(estado, 'RJ', 'Campos dos Goytacazes');
+	IncluirMunicipio(estado, 'RJ', 'Teresópolis');
+	IncluirMunicipio(estado, 'RJ', 'Petrópolis');
+	
+	IncluirMunicipio(estado, 'MG', 'Belo Horizonte');
+	IncluirMunicipio(estado, 'MG', 'Uberlândia');
+	IncluirMunicipio(estado, 'MG', 'Contagem');
+	IncluirMunicipio(estado, 'MG', 'Juiz de Fora');
+	IncluirMunicipio(estado, 'MG', 'Betim');
+	IncluirMunicipio(estado, 'MG', 'Ipatinga');
+	IncluirMunicipio(estado, 'MG', 'Montes Claros');
+	IncluirMunicipio(estado, 'MG', 'Governador Valadares');
+	IncluirMunicipio(estado, 'MG', 'Sete Lagoas');
+	IncluirMunicipio(estado, 'MG', 'Divinópolis');
+	
+	IncluirMunicipio(estado, 'RS', 'Porto Alegre');
+	IncluirMunicipio(estado, 'RS', 'Caxias do Sul');
+	IncluirMunicipio(estado, 'RS', 'Pelotas');
+	IncluirMunicipio(estado, 'RS', 'Santa Maria');
+	IncluirMunicipio(estado, 'RS', 'Gravataí');
+	IncluirMunicipio(estado, 'RS', 'Rio Grande');
+	IncluirMunicipio(estado, 'RS', 'Novo Hamburgo');
+	IncluirMunicipio(estado, 'RS', 'Santa Cruz do Sul');
+	IncluirMunicipio(estado, 'RS', 'São Leopoldo');
+	IncluirMunicipio(estado, 'RS', 'Bagé');
+	
+	IncluirMunicipio(estado, 'BA', 'Salvador');
+	IncluirMunicipio(estado, 'BA', 'Feira de Santana');
+	IncluirMunicipio(estado, 'BA', 'Vitória da Conquista');
+	IncluirMunicipio(estado, 'BA', 'Camaçari');
+	IncluirMunicipio(estado, 'BA', 'Itabuna');
+	IncluirMunicipio(estado, 'BA', 'Juazeiro');
+	IncluirMunicipio(estado, 'BA', 'Lauro de Freitas');
+	IncluirMunicipio(estado, 'BA', 'Ilhéus');
+	IncluirMunicipio(estado, 'BA', 'Porto Seguro');
+	IncluirMunicipio(estado, 'BA', 'Teixeira de Freitas');
+	
+	IncluirMunicipio(estado, 'PR', 'Curitiba');
+	IncluirMunicipio(estado, 'PR', 'Londrina');
+	IncluirMunicipio(estado, 'PR', 'Maringá');
+	IncluirMunicipio(estado, 'PR', 'Ponta Grossa');
+	IncluirMunicipio(estado, 'PR', 'Cascavel');
+	IncluirMunicipio(estado, 'PR', 'São José dos Pinhais');
+	IncluirMunicipio(estado, 'PR', 'Foz do Iguaçu');
+	IncluirMunicipio(estado, 'PR', 'Araucária');
+	IncluirMunicipio(estado, 'PR', 'Toledo');
+	IncluirMunicipio(estado, 'PR', 'Colombo');
+	
+	IncluirMunicipio(estado, 'PE', 'Recife');
+	IncluirMunicipio(estado, 'PE', 'Olinda');
+	IncluirMunicipio(estado, 'PE', 'Jaboatão dos Guararapes');
+	IncluirMunicipio(estado, 'PE', 'Caruaru');
+	IncluirMunicipio(estado, 'PE', 'Petrolina');
+	IncluirMunicipio(estado, 'PE', 'Garanhuns');
+	IncluirMunicipio(estado, 'PE', 'Igarassu');
+	IncluirMunicipio(estado, 'PE', 'São Lourenço da Mata');
+	IncluirMunicipio(estado, 'PE', 'Aglomeração Urbana do Recife');
+	IncluirMunicipio(estado, 'PE', 'Timbaúba');
+	
+	IncluirMunicipio(estado, 'CE', 'Fortaleza');
+	IncluirMunicipio(estado, 'CE', 'Caucaia');
+	IncluirMunicipio(estado, 'CE', 'Juazeiro do Norte');
+	IncluirMunicipio(estado, 'CE', 'Sobral');
+	IncluirMunicipio(estado, 'CE', 'Maracanaú');
+	IncluirMunicipio(estado, 'CE', 'Crato');
+	IncluirMunicipio(estado, 'CE', 'Iguatu');
+	IncluirMunicipio(estado, 'CE', 'Quixadá');
+	IncluirMunicipio(estado, 'CE', 'Aquiraz');
+	IncluirMunicipio(estado, 'CE', 'Pacajus');
+	
+	IncluirMunicipio(estado, 'GO', 'Goiânia');
+	IncluirMunicipio(estado, 'GO', 'Aparecida de Goiânia');
+	IncluirMunicipio(estado, 'GO', 'Anápolis');
+	IncluirMunicipio(estado, 'GO', 'Rio Verde');
+	IncluirMunicipio(estado, 'GO', 'Goiatuba');
+	IncluirMunicipio(estado, 'GO', 'Jataí');
+	IncluirMunicipio(estado, 'GO', 'Catalão');
+	IncluirMunicipio(estado, 'GO', 'Senador Canedo');
+	IncluirMunicipio(estado, 'GO', 'Formosa');
+	IncluirMunicipio(estado, 'GO', 'Luziânia');
+	
+	IncluirMunicipio(estado, 'SC', 'Florianópolis');
+	IncluirMunicipio(estado, 'SC', 'Joinville');
+	IncluirMunicipio(estado, 'SC', 'Blumenau');
+	IncluirMunicipio(estado, 'SC', 'Chapecó');
+	IncluirMunicipio(estado, 'SC', 'Criciúma');
+	IncluirMunicipio(estado, 'SC', 'São José');
+	IncluirMunicipio(estado, 'SC', 'Lages');
+	IncluirMunicipio(estado, 'SC', 'Itajaí');
+	IncluirMunicipio(estado, 'SC', 'Balneário Camboriú');
+	IncluirMunicipio(estado, 'SC', 'Jaraguá do Sul');}
+	opcao := 1;
+    
+  while opcao <> 0 do
+  begin
+      clrscr;
+      ExibirMenu;       
+      readln(opcao); 
+      clrscr;
+      
+      case opcao of
 
+          1: begin
+              writeln('Digite a UF: ');
+              readln(uf);
+              writeln('Digite o município: ');
+              readln(municipio);
+              IncluirMunicipio(estado, uf, municipio);
+              writeln('Estado e município incluídos com sucesso!');
+          end;
 
+          2: begin
+              writeln('Digite o estado: ');
+              readln(uf);
+              writeln('Digite o município: ');
+              readln(municipio);
+              est := VerificarNoExiste(estado, uf);
+              if (est <> nil) then
+              begin
+              	mun := VerificarNoExiste(est^.conteudo, municipio);
+              	if (mun <> nil) then
+              	begin
+              		ExcluirNo(estado, uf, municipio);
+              		writeln('Exclusão realizada com sucesso!');
+              	end
+              	else
+              		writeln('O município não existe');
+              end
+              else
+              	writeln('O estado não existe');
+          end;
+          3: begin
+              writeln('Exibindo estados em ordem:');
+              EmOrdem(estado);
+              writeln;
+          end;
+
+          4: begin
+              writeln('Exibindo estados e municípios em Pré-Ordem:');
+              PreOrdem(estado);
+              writeln;
+          end;
+          
+          5: begin
+            writeln('Contagem de municípios por estado:');
+    				ContarMunicipiosPorEstado(estado);       
+          end;
+
+          0: writeln('Saindo do programa...');
+      else
+          writeln('Opção inválida! Tente novamente.');
+      end;
+      
+      {writeln;
+      writeln('Pressione Enter para continuar...'); }
+      readln;
+  end;
 End.
