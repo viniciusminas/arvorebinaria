@@ -49,7 +49,7 @@ begin
     if Raiz <> nil then 
     begin
         write(Raiz^.nome, '-');
-        write('  | Raiz: ', Raiz^.conteudo^.nome, ' | Estados: ');
+        write('  | Raiz: ', Raiz^.conteudo^.nome, ' | Municípios: ');
         ExibirMunicipios(Raiz^.conteudo); //teste para mostrar os mun's.
         writeln;
         writeln;
