@@ -21,9 +21,6 @@ begin
 		ExibirNo(Raiz^.arvdir);
 	end;
 end;
-
-
-
 Procedure EmOrdem(Raiz: arvore);
 begin
     if Raiz <> nil then 
@@ -33,7 +30,6 @@ begin
         EmOrdem(Raiz^.arvdir);
     end;
 end;
-
 Procedure ExibirMunicipios(RaizMunicipio: arvore);
 begin
 	if RaizMunicipio <> nil then
@@ -43,13 +39,12 @@ begin
 		ExibirMunicipios(RaizMunicipio^.arvdir);
 	end;
 end;
-
 Procedure PreOrdem(Raiz: arvore);
 begin
     if Raiz <> nil then 
     begin
         write(Raiz^.nome, '-');
-        write('  | Raiz: ', Raiz^.conteudo^.nome, ' | Municípios: ');
+        write('  | Raiz: ', Raiz^.conteudo^.nome, ' | Estados: ');
         ExibirMunicipios(Raiz^.conteudo); //teste para mostrar os mun's.
         writeln;
         writeln;
@@ -57,7 +52,6 @@ begin
         PreOrdem(Raiz^.arvdir);
     end;
 end;
-
 Procedure EmOrdemMun(Raiz: arvore);
 begin
     if Raiz <> nil then 
@@ -67,7 +61,6 @@ begin
         EmOrdemMun(Raiz^.arvdir);
     end;
 end;
-
 Procedure Contar(Raiz: arvore; var count: integer);
 begin
     if Raiz <> nil then 
@@ -77,7 +70,6 @@ begin
         Contar(Raiz^.arvdir, count);
     end;
 end;
-
 procedure ContarMunicipiosPorEstado(raizEstado: arvore);
 var
     totalMunicipios: integer;
@@ -94,12 +86,10 @@ begin
         ContarMunicipiosPorEstado(raizEstado^.arvdir);
     end;
 end;
-
 procedure IniciarVariaveis(var est: arvore);
 begin
 	est := nil;	
 end; 
-
 function VerificarNoExiste(arv: arvore; conteudo: string):arvore;
 begin
 	if arv = nil then
@@ -111,7 +101,6 @@ begin
 	else
       VerificarNoExiste := VerificarNoExiste(arv^.arvdir, conteudo);        
 end;
-
 function CriarNo(var arv:arvore; arvpai:arvore; conteudo: string): arvore;
 var novoNo: arvore;
 begin
@@ -137,7 +126,6 @@ begin
             CriarNo(arv^.arvdir, arv, conteudo);
     end;
 end;
-
 procedure IncluirMunicipio(var arvraiz: arvore; uf, municipio: string);
 var 
 		est, estado: arvore;
@@ -156,8 +144,6 @@ begin
         else
             est := est^.arvdir;
     end;
-	
-	//condicional para adicionar o municipio na árvore desse estado
 	if (est <> nil) and (VerificarNoExiste(est^.conteudo, municipio) = nil) then
 		CriarNo(est^.conteudo, est^.conteudo, municipio)
 	else
@@ -182,7 +168,6 @@ begin
 	end
 				
 end;
-
 procedure ExcluirCentral(pai, no:arvore);
 var aux:arvore;
 begin
@@ -318,119 +303,6 @@ end;
 
 Begin  
   IniciarVariaveis(estado);
-	IncluirMunicipio(estado, 'SP', 'MM');
-	IncluirMunicipio(estado, 'SP', 'MM');
-	IncluirMunicipio(estado, 'SP', 'EE');
-	IncluirMunicipio(estado, 'SP', 'SS');
-	IncluirMunicipio(estado, 'SP', 'CC');
-	IncluirMunicipio(estado, 'SP', 'BB');
-	IncluirMunicipio(estado, 'SP', 'DD');
-	IncluirMunicipio(estado, 'SP', 'AA');
-	IncluirMunicipio(estado, 'SP', 'FF');
-	IncluirMunicipio(estado, 'SP', 'YY');
-	IncluirMunicipio(estado, 'SP', 'ZZ');
-	IncluirMunicipio(estado, 'SP', 'NN');
-	IncluirMunicipio(estado, 'SP', 'OO');
-	IncluirMunicipio(estado, 'SP', 'NA');
-	
-	{IncluirMunicipio(estado, 'RJ', 'Rio de Janeiro');
-	IncluirMunicipio(estado, 'RJ', 'Niterói');
-	IncluirMunicipio(estado, 'RJ', 'Nova Iguaçu');
-	IncluirMunicipio(estado, 'RJ', 'Duque de Caxias');
-	IncluirMunicipio(estado, 'RJ', 'Volta Redonda');
-	IncluirMunicipio(estado, 'RJ', 'Macaé');
-	IncluirMunicipio(estado, 'RJ', 'Cabo Frio');
-	IncluirMunicipio(estado, 'RJ', 'Campos dos Goytacazes');
-	IncluirMunicipio(estado, 'RJ', 'Teresópolis');
-	IncluirMunicipio(estado, 'RJ', 'Petrópolis');
-	
-	IncluirMunicipio(estado, 'MG', 'Belo Horizonte');
-	IncluirMunicipio(estado, 'MG', 'Uberlândia');
-	IncluirMunicipio(estado, 'MG', 'Contagem');
-	IncluirMunicipio(estado, 'MG', 'Juiz de Fora');
-	IncluirMunicipio(estado, 'MG', 'Betim');
-	IncluirMunicipio(estado, 'MG', 'Ipatinga');
-	IncluirMunicipio(estado, 'MG', 'Montes Claros');
-	IncluirMunicipio(estado, 'MG', 'Governador Valadares');
-	IncluirMunicipio(estado, 'MG', 'Sete Lagoas');
-	IncluirMunicipio(estado, 'MG', 'Divinópolis');
-	
-	IncluirMunicipio(estado, 'RS', 'Porto Alegre');
-	IncluirMunicipio(estado, 'RS', 'Caxias do Sul');
-	IncluirMunicipio(estado, 'RS', 'Pelotas');
-	IncluirMunicipio(estado, 'RS', 'Santa Maria');
-	IncluirMunicipio(estado, 'RS', 'Gravataí');
-	IncluirMunicipio(estado, 'RS', 'Rio Grande');
-	IncluirMunicipio(estado, 'RS', 'Novo Hamburgo');
-	IncluirMunicipio(estado, 'RS', 'Santa Cruz do Sul');
-	IncluirMunicipio(estado, 'RS', 'São Leopoldo');
-	IncluirMunicipio(estado, 'RS', 'Bagé');
-	
-	IncluirMunicipio(estado, 'BA', 'Salvador');
-	IncluirMunicipio(estado, 'BA', 'Feira de Santana');
-	IncluirMunicipio(estado, 'BA', 'Vitória da Conquista');
-	IncluirMunicipio(estado, 'BA', 'Camaçari');
-	IncluirMunicipio(estado, 'BA', 'Itabuna');
-	IncluirMunicipio(estado, 'BA', 'Juazeiro');
-	IncluirMunicipio(estado, 'BA', 'Lauro de Freitas');
-	IncluirMunicipio(estado, 'BA', 'Ilhéus');
-	IncluirMunicipio(estado, 'BA', 'Porto Seguro');
-	IncluirMunicipio(estado, 'BA', 'Teixeira de Freitas');
-	
-	IncluirMunicipio(estado, 'PR', 'Curitiba');
-	IncluirMunicipio(estado, 'PR', 'Londrina');
-	IncluirMunicipio(estado, 'PR', 'Maringá');
-	IncluirMunicipio(estado, 'PR', 'Ponta Grossa');
-	IncluirMunicipio(estado, 'PR', 'Cascavel');
-	IncluirMunicipio(estado, 'PR', 'São José dos Pinhais');
-	IncluirMunicipio(estado, 'PR', 'Foz do Iguaçu');
-	IncluirMunicipio(estado, 'PR', 'Araucária');
-	IncluirMunicipio(estado, 'PR', 'Toledo');
-	IncluirMunicipio(estado, 'PR', 'Colombo');
-	
-	IncluirMunicipio(estado, 'PE', 'Recife');
-	IncluirMunicipio(estado, 'PE', 'Olinda');
-	IncluirMunicipio(estado, 'PE', 'Jaboatão dos Guararapes');
-	IncluirMunicipio(estado, 'PE', 'Caruaru');
-	IncluirMunicipio(estado, 'PE', 'Petrolina');
-	IncluirMunicipio(estado, 'PE', 'Garanhuns');
-	IncluirMunicipio(estado, 'PE', 'Igarassu');
-	IncluirMunicipio(estado, 'PE', 'São Lourenço da Mata');
-	IncluirMunicipio(estado, 'PE', 'Aglomeração Urbana do Recife');
-	IncluirMunicipio(estado, 'PE', 'Timbaúba');
-	
-	IncluirMunicipio(estado, 'CE', 'Fortaleza');
-	IncluirMunicipio(estado, 'CE', 'Caucaia');
-	IncluirMunicipio(estado, 'CE', 'Juazeiro do Norte');
-	IncluirMunicipio(estado, 'CE', 'Sobral');
-	IncluirMunicipio(estado, 'CE', 'Maracanaú');
-	IncluirMunicipio(estado, 'CE', 'Crato');
-	IncluirMunicipio(estado, 'CE', 'Iguatu');
-	IncluirMunicipio(estado, 'CE', 'Quixadá');
-	IncluirMunicipio(estado, 'CE', 'Aquiraz');
-	IncluirMunicipio(estado, 'CE', 'Pacajus');
-	
-	IncluirMunicipio(estado, 'GO', 'Goiânia');
-	IncluirMunicipio(estado, 'GO', 'Aparecida de Goiânia');
-	IncluirMunicipio(estado, 'GO', 'Anápolis');
-	IncluirMunicipio(estado, 'GO', 'Rio Verde');
-	IncluirMunicipio(estado, 'GO', 'Goiatuba');
-	IncluirMunicipio(estado, 'GO', 'Jataí');
-	IncluirMunicipio(estado, 'GO', 'Catalão');
-	IncluirMunicipio(estado, 'GO', 'Senador Canedo');
-	IncluirMunicipio(estado, 'GO', 'Formosa');
-	IncluirMunicipio(estado, 'GO', 'Luziânia');
-	
-	IncluirMunicipio(estado, 'SC', 'Florianópolis');
-	IncluirMunicipio(estado, 'SC', 'Joinville');
-	IncluirMunicipio(estado, 'SC', 'Blumenau');
-	IncluirMunicipio(estado, 'SC', 'Chapecó');
-	IncluirMunicipio(estado, 'SC', 'Criciúma');
-	IncluirMunicipio(estado, 'SC', 'São José');
-	IncluirMunicipio(estado, 'SC', 'Lages');
-	IncluirMunicipio(estado, 'SC', 'Itajaí');
-	IncluirMunicipio(estado, 'SC', 'Balneário Camboriú');
-	IncluirMunicipio(estado, 'SC', 'Jaraguá do Sul');}
 	opcao := 1;
     
   while opcao <> 0 do
