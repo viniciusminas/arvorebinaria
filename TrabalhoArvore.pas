@@ -297,7 +297,7 @@ begin
     writeln('1 - Incluir Estado e Município');
     writeln('2 - Excluir Estado ou Município');
     writeln('3 - Exibir Estados em Ordem');
-    writeln('4 - Exibir Estados e Municípios em Pré-Ordem');
+    writeln('4 - Exibir Estados(Pré-Ordem) e Municípios(Em Ordem)');
 		writeln('5 - Contagem de quantos elementos cada UF tem cadastrado');    
 end;
 
@@ -350,7 +350,7 @@ Begin
           end;
 
           4: begin
-              writeln('Exibindo estados e municípios em Pré-Ordem:');
+              writeln('Exibindo estados(Pré-Ordem) e municípios(Em Ordem):');
               PreOrdem(estado);
               writeln;
           end;
